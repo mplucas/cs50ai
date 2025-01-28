@@ -51,28 +51,21 @@ knowledge2 = And(
 knowledge3 = And(
     baseKnowledge,
 
-    Implication(
-        AKnight,
-        Or(AKnight,AKnave)
+    Or(
+        And(
+            Implication(AKnight,AKnight),
+            Implication(AKnave,AKnave),
+        ),
+        And(
+            Implication(AKnight,AKnave),
+            Implication(AKnave,AKnight),
+        ),
     ),
 
-    Implication(
-        AKnave,
-        Not(Or(AKnave,AKnight))
-    ),
-
-    Implication(BKnight,
-        Or(
-            Implication(AKnight, AKnave),
-            Implication(AKnave, AKnight)
-        )
-    ),
-    Implication(BKnave,
-        Not(Or(
-            Implication(AKnight, AKnave),
-            Implication(AKnave, AKnight)
-        ))
-    ),
+    Implication(BKnight, Implication(AKnight, AKnave)),
+    Implication(BKnight, Implication(AKnave, AKnight)),
+    Implication(BKnave, Implication(AKnight, AKnight)),
+    Implication(BKnave, Implication(AKnave, AKnave)),
 
     Implication(BKnight, CKnave),
     Implication(BKnave, CKnight),
