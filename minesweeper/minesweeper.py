@@ -211,14 +211,13 @@ class MinesweeperAI():
                             added_new_knowledge = True
             if added_new_knowledge == False:
                 break
-        for sentence in self.knowledge:
-            if len(sentence.cells) == sentence.count:
-                for cell in list(sentence.cells):
-                    self.mark_mine(cell)
-            elif sentence.count == 0:
-                for cell in list(sentence.cells):
-                    self.mark_safe(cell)
-
+            for sentence in self.knowledge:
+                if len(sentence.cells) == sentence.count:
+                    for cell in list(sentence.cells):
+                        self.mark_mine(cell)
+                elif sentence.count == 0:
+                    for cell in list(sentence.cells):
+                        self.mark_safe(cell)
 
     def get_cell_sentence(self, cell, count):
         sentence_cells = set()
