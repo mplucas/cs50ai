@@ -1,7 +1,6 @@
 import itertools
 import random
 
-
 class Minesweeper():
     """
     Minesweeper game representation
@@ -191,39 +190,54 @@ class MinesweeperAI():
         """
         self.moves_made.add(cell)
         self.mark_safe(cell)
+        # self.knowledge.append(Sentence(cell, count))
         self.knowledge.append(self.get_cell_sentence(cell, count))
         for sentence in self.knowledge:
             if len(sentence.cells) == sentence.count:
-                for cell_a in sentence.cells:
-                    self.mark_mine(cell_a)
+                for cell in list(sentence.cells):
+                    self.mark_mine(cell)
             elif sentence.count == 0:
-                for cell_a in sentence.cells:
-                    self.mark_safe(cell_a)
-        for sentence_a in self.knowledge:
-            for sentence_b in self.knowledge:
-                if sentence_a.cells != sentence_b.cells and sentence_a.cells.issubset(sentence_b.cells):
-                    sentence_new = Sentence(sentence_b.cells.copy(), sentence_b.count)
-                    for cell_a in sentence_a.cells:
-                        sentence_new.cells.remove(cell_a)
-                        sentence_new.count = sentence_new.count - 1
-                    self.knowledge.append(sentence_new)
+                for cell in list(sentence.cells):
+                    self.mark_safe(cell)
+        while True:
+            knowledge_copy = self.knowledge.copy()
+            added_new_knowledge = False
+            for sentence_a in knowledge_copy:
+                for sentence_b in knowledge_copy:
+                    if sentence_a.cells != sentence_b.cells and sentence_a.cells.issubset(sentence_b.cells):
+                        sentence_new = Sentence(sentence_b.cells - sentence_a.cells, sentence_b.count - sentence_a.count)
+                        if sentence_new not in self.knowledge:
+                            self.knowledge.append(sentence_new)
+                            added_new_knowledge = True
+            if added_new_knowledge == False:
+                break
+        for sentence in self.knowledge:
+            if len(sentence.cells) == sentence.count:
+                for cell in list(sentence.cells):
+                    self.mark_mine(cell)
+            elif sentence.count == 0:
+                for cell in list(sentence.cells):
+                    self.mark_safe(cell)
 
 
     def get_cell_sentence(self, cell, count):
         sentence_cells = set()
         sentence_count = count
-        i_min, i_max = max(0, cell[0] - 1), min(self.height, cell[0] + 1)
-        j_min, j_max = max(0, cell[1] - 1), min(self.width, cell[1] + 1)
+        i_min, i_max = max(0, cell[0] - 1), min(self.height, cell[0] + 2)
+        j_min, j_max = max(0, cell[1] - 1), min(self.width, cell[1] + 2)
         for i in range(i_min, i_max):
             for j in range(j_min, j_max):
                 if i == cell[0] and j == cell[1]:
                     continue
                 neighbor_cell = (i, j)
-                if neighbor_cell in self.mines:
-                    sentence_count = sentence_count - 1
-                elif neighbor_cell not in self.safes:
-                    sentence_cells.add(neighbor_cell)
-        return Sentence(sentence_cells, sentence_count)
+                sentence_cells.add(neighbor_cell)
+        new_sentence = Sentence(sentence_cells, sentence_count)
+        for sentence_cell in list(new_sentence.cells):
+            if sentence_cell in self.mines:
+                new_sentence.mark_mine(sentence_cell)
+            elif sentence_cell in self.safes:
+                new_sentence.mark_safe(sentence_cell)
+        return new_sentence
 
     def make_safe_move(self):
         """
@@ -247,9 +261,10 @@ class MinesweeperAI():
             2) are not known to be mines
         """
         cells_ignored = self.moves_made.union(self.mines)
-        for i in range(self.height):
-            for j in range(self.width):
-                cell = (i, j)
-                if cell not in cells_ignored:
-                    return cell
+        while True:
+            i = random.randrange(self.height)
+            j = random.randrange(self.width)
+            cell = (i, j)
+            if cell not in cells_ignored:
+                return cell
         return None
