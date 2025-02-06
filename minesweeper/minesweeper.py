@@ -190,34 +190,9 @@ class MinesweeperAI():
         """
         self.moves_made.add(cell)
         self.mark_safe(cell)
-        # self.knowledge.append(Sentence(cell, count))
         self.knowledge.append(self.get_cell_sentence(cell, count))
-        for sentence in self.knowledge:
-            if len(sentence.cells) == sentence.count:
-                for cell in list(sentence.cells):
-                    self.mark_mine(cell)
-            elif sentence.count == 0:
-                for cell in list(sentence.cells):
-                    self.mark_safe(cell)
-        while True:
-            knowledge_copy = self.knowledge.copy()
-            added_new_knowledge = False
-            for sentence_a in knowledge_copy:
-                for sentence_b in knowledge_copy:
-                    if sentence_a.cells != sentence_b.cells and sentence_a.cells.issubset(sentence_b.cells):
-                        sentence_new = Sentence(sentence_b.cells - sentence_a.cells, sentence_b.count - sentence_a.count)
-                        if sentence_new not in self.knowledge:
-                            self.knowledge.append(sentence_new)
-                            added_new_knowledge = True
-            if added_new_knowledge == False:
-                break
-            for sentence in self.knowledge:
-                if len(sentence.cells) == sentence.count:
-                    for cell in list(sentence.cells):
-                        self.mark_mine(cell)
-                elif sentence.count == 0:
-                    for cell in list(sentence.cells):
-                        self.mark_safe(cell)
+        self.mark_current_mines_and_safes()
+        self.add_knowledge_from_current_knowledge()
 
     def get_cell_sentence(self, cell, count):
         sentence_cells = set()
@@ -237,6 +212,27 @@ class MinesweeperAI():
             elif sentence_cell in self.safes:
                 new_sentence.mark_safe(sentence_cell)
         return new_sentence
+
+    def mark_current_mines_and_safes(self):
+        for sentence in self.knowledge:
+            if len(sentence.cells) == sentence.count:
+                for cell in list(sentence.cells):
+                    self.mark_mine(cell)
+            elif sentence.count == 0:
+                for cell in list(sentence.cells):
+                    self.mark_safe(cell)
+
+    def add_knowledge_from_current_knowledge(self):        
+        new_knowledge = self.knowledge.copy()
+        while len(new_knowledge) > 0:
+            knowledge_copy = self.knowledge.copy()
+            sentence_a = new_knowledge.pop(0)
+            for sentence_b in knowledge_copy:
+                if sentence_a != sentence_b and sentence_a.cells.issubset(sentence_b.cells):
+                    sentence_new = Sentence(sentence_b.cells - sentence_a.cells, sentence_b.count - sentence_a.count)
+                    self.knowledge.append(sentence_new)
+                    new_knowledge.append(sentence_new)
+            self.mark_current_mines_and_safes()
 
     def make_safe_move(self):
         """
