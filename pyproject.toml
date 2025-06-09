@@ -1,0 +1,9 @@
+[project]
+name = "cs50ai"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "check50>=3.3.11",
+]
