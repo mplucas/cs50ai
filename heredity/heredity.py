@@ -215,10 +215,10 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         * everyone in set `have_trait` has the trait, and
         * everyone not in set` have_trait` does not have the trait.
     """
-    result = []
+    probabilities = []
     for name in people:
-        person_genes = 0
-        person_trait = 0
+        person_genes = None
+        person_trait = None
         if name in one_gene:   
             person_genes = 1
         elif name in two_genes:
@@ -241,8 +241,11 @@ def joint_probability(people, one_gene, two_genes, have_trait):
             mother_genes = 1 if mother in one_gene else 2 if mother in two_genes else 0
             gene_probability = INHERIT_PROBABILITY[person_genes][father_genes][mother_genes]
             trait_probability = PROBS['trait'][person_genes][person_trait]
-        result.append(gene_probability*trait_probability)
-    return sum(result)
+        probabilities.append(gene_probability*trait_probability)
+    result = 1
+    for value in probabilities:
+        result = result*value
+    return result
 
 
 def update(probabilities, one_gene, two_genes, have_trait, p):
@@ -252,7 +255,21 @@ def update(probabilities, one_gene, two_genes, have_trait, p):
     Which value for each distribution is updated depends on whether
     the person is in `have_gene` and `have_trait`, respectively.
     """
-    raise NotImplementedError
+    for name in probabilities:
+        person_genes = None
+        person_trait = None
+        if name in one_gene:   
+            person_genes = 1
+        elif name in two_genes:
+            person_genes = 2
+        else:
+            person_genes = 0
+        if name in have_trait:
+            person_trait = True
+        else:
+            person_trait = False
+        probabilities[name]['gene'][person_genes] = probabilities[name]['gene'][person_genes] + p
+        probabilities[name]['trait'][person_trait] = probabilities[name]['trait'][person_trait] + p
 
 
 def normalize(probabilities):
@@ -260,7 +277,17 @@ def normalize(probabilities):
     Update `probabilities` such that each probability distribution
     is normalized (i.e., sums to 1, with relative proportions the same).
     """
-    raise NotImplementedError
+    for name in probabilities:
+        sum_genes = 0
+        for gene in probabilities[name]['gene']:
+            sum_genes = sum_genes + probabilities[name]['gene'][gene]
+        for gene in probabilities[name]['gene']:
+            probabilities[name]['gene'][gene] = probabilities[name]['gene'][gene]/sum_genes
+        sum_traits = 0
+        for trait in probabilities[name]['trait']:
+            sum_traits = sum_traits + probabilities[name]['trait'][trait]
+        for trait in probabilities[name]['trait']:
+            probabilities[name]['trait'][trait] = probabilities[name]['trait'][trait]/sum_traits
 
 
 if __name__ == "__main__":
