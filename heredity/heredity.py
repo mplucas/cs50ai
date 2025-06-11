@@ -130,23 +130,23 @@ def powerset(s):
 
 INHERIT_PROBABILITY = {
     # son gene
-    0:{
+    0: {
         # father gene
-        0:{
+        0: {
             # mother gene
             0: (1 - PROBS['mutation'])*(1 - PROBS['mutation']),
             1: (1 - PROBS['mutation'])*0.5,
             2: (1 - PROBS['mutation'])*PROBS['mutation'],
         },
         # father gene
-        1:{
+        1: {
             # mother gene
             0: 0.5*(1 - PROBS['mutation']),
             1: 0.5*0.5,
             2: 0.5*PROBS['mutation'],
         },
         # father gene
-        2:{
+        2: {
             # mother gene
             0: PROBS['mutation']*(1 - PROBS['mutation']),
             1: PROBS['mutation']*0.5,
@@ -154,23 +154,23 @@ INHERIT_PROBABILITY = {
         },
     },
     # son gene
-    1:{
+    1: {
         # father gene
-        0:{
+        0: {
             # mother gene
             0: ((1 - PROBS['mutation'])*PROBS['mutation'])*2,
             1: (1 - PROBS['mutation'])*0.5 + PROBS['mutation']*0.5,
             2: (1 - PROBS['mutation'])*(1 - PROBS['mutation']) + PROBS['mutation']*PROBS['mutation'],
         },
         # father gene
-        1:{
+        1: {
             # mother gene
             0: 0.5*(1 - PROBS['mutation']) + 0.5*PROBS['mutation'],
             1: 0.5*0.5*2,
             2: 0.5*(1 - PROBS['mutation']) + 0.5*PROBS['mutation'],
         },
         # father gene
-        2:{
+        2: {
             # mother gene
             0: (1 - PROBS['mutation'])*(1 - PROBS['mutation']) + PROBS['mutation']*PROBS['mutation'],
             1: (1 - PROBS['mutation'])*0.5 + PROBS['mutation']*0.5,
@@ -178,23 +178,23 @@ INHERIT_PROBABILITY = {
         },
     },
     # son gene
-    2:{
+    2: {
         # father gene
-        0:{
+        0: {
             # mother gene
             0: PROBS['mutation']*PROBS['mutation'],
             1: PROBS['mutation']*0.5,
             2: PROBS['mutation']*(1 - PROBS['mutation'])
         },
         # father gene
-        1:{
+        1: {
             # mother gene
             0: 0.5*PROBS['mutation'],
             1: 0.5*0.5,
             2: 0.5*(1 - PROBS['mutation'])
         },
         # father gene
-        2:{
+        2: {
             # mother gene
             0: (1 - PROBS['mutation'])*PROBS['mutation'],
             1: (1 - PROBS['mutation'])*0.5,
