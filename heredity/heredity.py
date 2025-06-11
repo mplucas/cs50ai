@@ -128,6 +128,82 @@ def powerset(s):
     ]
 
 
+INHERIT_PROBABILITY = {
+    # son gene
+    0:{
+        # father gene
+        0:{
+            # mother gene
+            0: (1 - PROBS['mutation'])*(1 - PROBS['mutation']),
+            1: (1 - PROBS['mutation'])*0.5,
+            2: (1 - PROBS['mutation'])*PROBS['mutation'],
+        },
+        # father gene
+        1:{
+            # mother gene
+            0: 0.5*(1 - PROBS['mutation']),
+            1: 0.5*0.5,
+            2: 0.5*PROBS['mutation'],
+        },
+        # father gene
+        2:{
+            # mother gene
+            0: PROBS['mutation']*(1 - PROBS['mutation']),
+            1: PROBS['mutation']*0.5,
+            2: PROBS['mutation']*PROBS['mutation'],
+        },
+    },
+    # son gene
+    1:{
+        # father gene
+        0:{
+            # mother gene
+            0: ((1 - PROBS['mutation'])*PROBS['mutation'])*2,
+            1: (1 - PROBS['mutation'])*0.5 + PROBS['mutation']*0.5,
+            2: (1 - PROBS['mutation'])*(1 - PROBS['mutation']) + PROBS['mutation']*PROBS['mutation'],
+        },
+        # father gene
+        1:{
+            # mother gene
+            0: 0.5*(1 - PROBS['mutation']) + 0.5*PROBS['mutation'],
+            1: 0.5*0.5*2,
+            2: 0.5*(1 - PROBS['mutation']) + 0.5*PROBS['mutation'],
+        },
+        # father gene
+        2:{
+            # mother gene
+            0: (1 - PROBS['mutation'])*(1 - PROBS['mutation']) + PROBS['mutation']*PROBS['mutation'],
+            1: (1 - PROBS['mutation'])*0.5 + PROBS['mutation']*0.5,
+            2: ((1 - PROBS['mutation'])*PROBS['mutation'])*2,
+        },
+    },
+    # son gene
+    2:{
+        # father gene
+        0:{
+            # mother gene
+            0: PROBS['mutation']*PROBS['mutation'],
+            1: PROBS['mutation']*0.5,
+            2: PROBS['mutation']*(1 - PROBS['mutation'])
+        },
+        # father gene
+        1:{
+            # mother gene
+            0: 0.5*PROBS['mutation'],
+            1: 0.5*0.5,
+            2: 0.5*(1 - PROBS['mutation'])
+        },
+        # father gene
+        2:{
+            # mother gene
+            0: (1 - PROBS['mutation'])*PROBS['mutation'],
+            1: (1 - PROBS['mutation'])*0.5,
+            2: (1 - PROBS['mutation'])*(1 - PROBS['mutation'])
+        },
+    }
+}
+
+
 def joint_probability(people, one_gene, two_genes, have_trait):
     """
     Compute and return a joint probability.
@@ -153,8 +229,19 @@ def joint_probability(people, one_gene, two_genes, have_trait):
             person_trait = True
         else:
             person_trait = False
-        # if people[name]['father'] == None and people[name]['mother'] == None:
-        result.append()
+        gene_probability = 0
+        trait_probability = 0
+        father = people[name]['father']
+        mother = people[name]['mother']
+        if father == None and mother == None:
+            gene_probability = PROBS['gene'][person_genes]
+            trait_probability = PROBS['trait'][person_genes][person_trait]
+        else:
+            father_genes = 1 if father in one_gene else 2 if father in two_genes else 0
+            mother_genes = 1 if mother in one_gene else 2 if mother in two_genes else 0
+            gene_probability = INHERIT_PROBABILITY[person_genes][father_genes][mother_genes]
+            trait_probability = PROBS['trait'][person_genes][person_trait]
+        result.append(gene_probability*trait_probability)
     return sum(result)
 
 
