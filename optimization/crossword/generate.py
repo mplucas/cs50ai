@@ -205,7 +205,7 @@ class CrosswordCreator():
             elimination_rank_per_value_dict[value] = 0
             for overlap_tuple in self.crossword.overlaps:
                 [x, y] = overlap_tuple
-                if x != var or x in assignment:
+                if x != var or y in assignment:
                     continue
                 for y_var in self.domains[y]:
                     if y_var == var:
