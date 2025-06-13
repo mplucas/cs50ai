@@ -153,9 +153,9 @@ class CrosswordCreator():
             if self.revise(x, y):
                 if len(self.domains[x]) == 0:
                     return False
-                for overlap_tuple in self.crossword.overlaps:
-                    if x == overlap_tuple[1] and y != overlap_tuple[0]:
-                        arcs.insert(0, overlap_tuple)
+                for z in self.crossword.neighbors(x):
+                    if y != z:
+                        arcs.insert(0, (z, x))
         return True
 
 
@@ -182,12 +182,9 @@ class CrosswordCreator():
             if value in values_present:
                 return False
             values_present.append(value)
-            for overlap_tuple in self.crossword.overlaps:
-                [x, y] = overlap_tuple
-                if x != variable:
-                    continue
-                overlap = self.crossword.overlaps[overlap_tuple]
-                if overlap != None and x[overlap[0]] != y[overlap[1]]:
+            for neighbor in self.crossword.neighbors(variable):
+                i, j = self.crossword.overlaps[variable, neighbor]
+                if variable[i] != neighbor[j]:
                     return False
         return True
 
@@ -203,12 +200,11 @@ class CrosswordCreator():
         for value in self.domains[var]:
             result.append(value)
             elimination_rank_per_value_dict[value] = 0
-            for overlap_tuple in self.crossword.overlaps:
-                [x, y] = overlap_tuple
-                if x != var or y in assignment:
+            for neighbor in self.crossword.neighbors(var):
+                if neighbor in assignment:
                     continue
-                for y_var in self.domains[y]:
-                    if y_var == var:
+                for neighbor_value in self.domains[neighbor]:
+                    if neighbor_value == value:
                         elimination_rank_per_value_dict = elimination_rank_per_value_dict + 1
         result.sort(lambda x: elimination_rank_per_value_dict[x])
         return result
@@ -225,7 +221,7 @@ class CrosswordCreator():
         unassigned_variables = list(set(self.domains) - set(assignment))
         unassigned_variables.sort(lambda x: len(self.domains[x]) * 10000 + len(self.crossword.neighbors(x)))
         return unassigned_variables
-        
+
 
     def backtrack(self, assignment):
         """
