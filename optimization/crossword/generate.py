@@ -14,7 +14,6 @@ class CrosswordCreator():
             var: self.crossword.words.copy()
             for var in self.crossword.variables
         }
-        print(self.domains)
 
     def letter_grid(self, assignment):
         """
@@ -224,15 +223,23 @@ class CrosswordCreator():
 
 
     def backtrack(self, assignment):
-        """
-        Using Backtracking Search, take as input a partial assignment for the
-        crossword and return a complete assignment if possible to do so.
-
-        `assignment` is a mapping from variables (keys) to words (values).
-
-        If no assignment is possible, return None.
-        """
-        raise NotImplementedError
+        if len(assignment) == len(self.domains):
+            return assignment
+        var = self.select_unassigned_variable(assignment)
+        for value in self.domains[var]:
+            new_assignment = assignment.copy()
+            new_assignment[var] = value
+            domains_backup = self.domains.copy()
+            arcs = set(filter(lambda x: x[0] not in new_assignment))
+            self.ac3(arcs)
+            result = None
+            if self.consistent(new_assignment):
+                result = self.backtrack(new_assignment)
+                if result != None:
+                    return result
+            if result == None:
+                self.domains = domains_backup
+        return None
 
 
 def main():
