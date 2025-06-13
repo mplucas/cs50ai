@@ -199,13 +199,19 @@ class CrosswordCreator():
         that rules out the fewest values among the neighbors of `var`.
         """
         elimination_rank_per_value_dict = {}
+        result = []
         for value in self.domains[var]:
+            result.append(value)
+            elimination_rank_per_value_dict[value] = 0
             for overlap_tuple in self.crossword.overlaps:
-                if x != var:
-                    continue
                 [x, y] = overlap_tuple
-                if x in assignment:
+                if x != var or x in assignment:
                     continue
+                for y_var in self.domains[y]:
+                    if y_var == var:
+                        elimination_rank_per_value_dict = elimination_rank_per_value_dict + 1
+        result.sort(lambda x: elimination_rank_per_value_dict[x])
+        return result
             
 
     def select_unassigned_variable(self, assignment):
