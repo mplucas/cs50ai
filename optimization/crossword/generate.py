@@ -196,9 +196,10 @@ class CrosswordCreator():
             for neighbor in self.crossword.neighbors(var):
                 if neighbor in assignment:
                     continue
+                i, j = self.crossword.overlaps[var, neighbor]
                 for neighbor_value in self.domains[neighbor]:
-                    if neighbor_value == value:
-                        elimination_rank_per_value_dict = elimination_rank_per_value_dict + 1
+                    if value[i] != neighbor_value[j]:
+                        elimination_rank_per_value_dict[value] = elimination_rank_per_value_dict[value] + 1
         result.sort(key=lambda x: elimination_rank_per_value_dict[x])
         return result            
 
@@ -219,7 +220,8 @@ class CrosswordCreator():
         if len(assignment) == len(self.domains):
             return assignment
         var = self.select_unassigned_variable(assignment)
-        for value in self.domains[var]:
+        values = self.order_domain_values(var, assignment)
+        for value in values:
             new_assignment = assignment.copy()
             new_assignment[var] = value
             domains_backup = self.domains.copy()
