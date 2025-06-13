@@ -105,7 +105,6 @@ class CrosswordCreator():
                 if variable.length != len(value):
                     self.domains[variable].remove(value)
 
-
     def revise(self, x, y):
         """
         Make variable `x` arc consistent with variable `y`.
@@ -131,8 +130,6 @@ class CrosswordCreator():
                 result = True
         return result
 
-
-
     def ac3(self, arcs=None):
         """
         Update `self.domains` such that each variable is arc consistent.
@@ -156,7 +153,6 @@ class CrosswordCreator():
                     if y != z:
                         arcs.insert(0, (z, x))
         return True
-
 
     def assignment_complete(self, assignment):
         """
@@ -204,8 +200,7 @@ class CrosswordCreator():
                     if neighbor_value == value:
                         elimination_rank_per_value_dict = elimination_rank_per_value_dict + 1
         result.sort(key=lambda x: elimination_rank_per_value_dict[x])
-        return result
-            
+        return result            
 
     def select_unassigned_variable(self, assignment):
         """
@@ -216,9 +211,9 @@ class CrosswordCreator():
         return values.
         """
         unassigned_variables = list(set(self.domains) - set(assignment))
-        unassigned_variables.sort(key=lambda x: len(self.domains[x]) * 10000 + len(self.crossword.neighbors(x)))
+        unassigned_variables.sort(key=lambda x: len(
+            self.domains[x]) * 10000 + len(self.crossword.neighbors(x)))
         return unassigned_variables[0]
-
 
     def backtrack(self, assignment):
         if len(assignment) == len(self.domains):
