@@ -183,7 +183,7 @@ class CrosswordCreator():
             values_present.append(value)
             for neighbor in self.crossword.neighbors(variable):
                 i, j = self.crossword.overlaps[variable, neighbor]
-                if variable[i] != neighbor[j]:
+                if neighbor in assignment and value[i] != assignment[neighbor][j]:
                     return False
         return True
 
@@ -205,7 +205,7 @@ class CrosswordCreator():
                 for neighbor_value in self.domains[neighbor]:
                     if neighbor_value == value:
                         elimination_rank_per_value_dict = elimination_rank_per_value_dict + 1
-        result.sort(lambda x: elimination_rank_per_value_dict[x])
+        result.sort(key=lambda x: elimination_rank_per_value_dict[x])
         return result
             
 
@@ -218,8 +218,8 @@ class CrosswordCreator():
         return values.
         """
         unassigned_variables = list(set(self.domains) - set(assignment))
-        unassigned_variables.sort(lambda x: len(self.domains[x]) * 10000 + len(self.crossword.neighbors(x)))
-        return unassigned_variables
+        unassigned_variables.sort(key=lambda x: len(self.domains[x]) * 10000 + len(self.crossword.neighbors(x)))
+        return unassigned_variables[0]
 
 
     def backtrack(self, assignment):
@@ -230,7 +230,7 @@ class CrosswordCreator():
             new_assignment = assignment.copy()
             new_assignment[var] = value
             domains_backup = self.domains.copy()
-            arcs = set(filter(lambda x: x[0] not in new_assignment))
+            arcs = set(filter(lambda x: x[0] not in new_assignment, self.crossword.overlaps))
             self.ac3(arcs)
             result = None
             if self.consistent(new_assignment):
