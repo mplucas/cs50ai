@@ -14,6 +14,7 @@ class CrosswordCreator():
             var: self.crossword.words.copy()
             for var in self.crossword.variables
         }
+        print(self.domains)
 
     def letter_grid(self, assignment):
         """
@@ -99,7 +100,12 @@ class CrosswordCreator():
         (Remove any values that are inconsistent with a variable's unary
          constraints; in this case, the length of the word.)
         """
-        raise NotImplementedError
+        for variable in self.domains:
+            variables = self.domains[variable].copy()
+            for value in variables:
+                if variable.length != len(value):
+                    self.domains[variable].remove(value)
+
 
     def revise(self, x, y):
         """
@@ -110,7 +116,23 @@ class CrosswordCreator():
         Return True if a revision was made to the domain of `x`; return
         False if no revision was made.
         """
-        raise NotImplementedError
+        overlap = self.crossword.overlaps[x, y]
+        if overlap == None:
+            return False
+        result = False
+        x_domain = self.domains[x].copy()
+        for x_value in x_domain:
+            has_valid_y = False
+            for y_value in self.domains[y]:
+                if x_value[overlap[0]] == y_value[overlap[1]]:
+                    has_valid_y = True
+                    break
+            if not has_valid_y:
+                self.domains[x].remove(x_value)
+                result = True
+        return result
+
+
 
     def ac3(self, arcs=None):
         """
@@ -121,21 +143,53 @@ class CrosswordCreator():
         Return True if arc consistency is enforced and no domains are empty;
         return False if one or more domains end up empty.
         """
-        raise NotImplementedError
+        if arcs == None:
+            arcs = []
+            for overlap_tuple in self.crossword.overlaps:
+                if self.crossword.overlaps[overlap_tuple] != None:
+                    arcs.insert(0, overlap_tuple)
+        while len(arcs) > 0:
+            [x, y] = arcs.pop()
+            if self.revise(x, y):
+                if len(self.domains[x]) == 0:
+                    return False
+                for overlap_tuple in self.crossword.overlaps:
+                    if x == overlap_tuple[1] and y != overlap_tuple[0]:
+                        arcs.insert(0, overlap_tuple)
+        return True
+
 
     def assignment_complete(self, assignment):
         """
         Return True if `assignment` is complete (i.e., assigns a value to each
         crossword variable); return False otherwise.
         """
-        raise NotImplementedError
+        variables = self.crossword.variables.copy()
+        for value in assignment.values():
+            variables.remove(value)
+        return len(variables) == 0
 
     def consistent(self, assignment):
         """
         Return True if `assignment` is consistent (i.e., words fit in crossword
         puzzle without conflicting characters); return False otherwise.
         """
-        raise NotImplementedError
+        values_present = []
+        for variable in assignment:
+            value = assignment[variable]
+            if len(value) != variable.length:
+                return False
+            if value in values_present:
+                return False
+            values_present.append(value)
+            for overlap_tuple in self.crossword.overlaps:
+                [x, y] = overlap_tuple
+                if x != variable:
+                    continue
+                overlap = self.crossword.overlaps[overlap_tuple]
+                if overlap != None and x[overlap[0]] != y[overlap[1]]:
+                    return False
+        return True
 
     def order_domain_values(self, var, assignment):
         """
@@ -144,7 +198,15 @@ class CrosswordCreator():
         The first value in the list, for example, should be the one
         that rules out the fewest values among the neighbors of `var`.
         """
-        raise NotImplementedError
+        elimination_rank_per_value_dict = {}
+        for value in self.domains[var]:
+            for overlap_tuple in self.crossword.overlaps:
+                if x != var:
+                    continue
+                [x, y] = overlap_tuple
+                if x in assignment:
+                    continue
+            
 
     def select_unassigned_variable(self, assignment):
         """
